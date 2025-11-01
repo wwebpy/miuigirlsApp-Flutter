@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'services/storage_service.dart';
 import 'services/notification_service.dart';
+import 'services/preferences_service.dart';
+import 'providers/app_provider.dart';
 import 'screens/main_navigation.dart';
 
 void main() async {
@@ -19,6 +22,7 @@ void main() async {
   // Initialize services
   await StorageService.init();
   await NotificationService.init();
+  await PreferencesService.init();
 
   runApp(const MyApp());
 }
@@ -28,11 +32,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Miui',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const MainNavigation(),
+    return ChangeNotifierProvider(
+      create: (_) => AppProvider(),
+      child: Consumer<AppProvider>(
+        builder: (context, appProvider, _) {
+          return MaterialApp(
+            title: 'Miui',
+            debugShowCheckedModeBanner: false,
+            theme: appProvider.currentThemeData,
+            home: const MainNavigation(),
+          );
+        },
+      ),
     );
   }
 }

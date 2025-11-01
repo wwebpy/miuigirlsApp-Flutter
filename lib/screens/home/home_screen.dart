@@ -4,9 +4,12 @@ import '../../core/constants/app_colors.dart';
 import '../../models/mood.dart';
 import '../../models/note.dart';
 import '../../services/storage_service.dart';
+import '../settings/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final Function(int)? onNavigate;
+
+  const HomeScreen({super.key, this.onNavigate});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -103,17 +106,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Greeting
+                    // Greeting with Profile Icon
                     Row(
                       children: [
-                        Text(
-                          _getGreeting(),
-                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                                fontWeight: FontWeight.w700,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Text(
+                                _getGreeting(),
+                                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                    ),
                               ),
+                              const SizedBox(width: 8),
+                              Text(_getGreetingEmoji(), style: const TextStyle(fontSize: 28)),
+                            ],
+                          ),
                         ),
-                        const SizedBox(width: 8),
-                        Text(_getGreetingEmoji(), style: const TextStyle(fontSize: 28)),
+                        IconButton(
+                          icon: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.person_rounded,
+                              color: AppColors.primary,
+                              size: 22,
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SettingsScreen(),
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -256,6 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             StorageService.getAllVisionboards().length.toString(),
                             Icons.star_rounded,
                             AppColors.accentGold,
+                            3, // Goals page index
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -265,6 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             StorageService.getAllNotes().length.toString(),
                             Icons.edit_note_rounded,
                             AppColors.secondary,
+                            2, // Notes page index
                           ),
                         ),
                       ],
@@ -336,38 +369,46 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-          ),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-          ),
-        ],
+  Widget _buildStatCard(String label, String value, IconData icon, Color color, int pageIndex) {
+    return InkWell(
+      onTap: () {
+        if (widget.onNavigate != null) {
+          widget.onNavigate!(pageIndex);
+        }
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadow,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+            ),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }

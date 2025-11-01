@@ -121,4 +121,12 @@ class StorageService {
         .toList()
       ..sort((a, b) => a.date.compareTo(b.date));
   }
+
+  // Clear all data
+  static Future<void> clearAllData() async {
+    await visionboards.clear();
+    await notes.clear();
+    await reminders.clear();
+    await moods.clear();
+  }
 }
