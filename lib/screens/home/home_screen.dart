@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/mood.dart';
 import '../../models/note.dart';
 import '../../services/storage_service.dart';
+import '../../providers/app_provider.dart';
 import '../settings/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -95,8 +97,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appProvider = Provider.of<AppProvider>(context);
+    final colors = appProvider.currentThemeColors;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -127,12 +132,12 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.15),
+                              color: colors.primary.withOpacity(0.15),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.person_rounded,
-                              color: AppColors.primary,
+                              color: colors.primary,
                               size: 22,
                             ),
                           ),
@@ -151,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       'Ready to make today amazing?',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                     ),
                     const SizedBox(height: 24),
@@ -162,14 +167,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [AppColors.primary, AppColors.primaryLight],
+                          colors: [colors.primary, colors.primaryLight],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.3),
+                            color: colors.primary.withOpacity(0.3),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -221,11 +226,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
+                        color: colors.surface,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.shadow,
+                            color: colors.shadow,
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -236,9 +241,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.sentiment_satisfied_alt_rounded,
-                                color: AppColors.primary,
+                                color: colors.primary,
                                 size: 24,
                               ),
                               const SizedBox(width: 10),
@@ -254,11 +259,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              _buildMoodButton('😢', 0, AppColors.moodTerrible),
-                              _buildMoodButton('😕', 1, AppColors.moodBad),
-                              _buildMoodButton('😐', 2, AppColors.moodOkay),
-                              _buildMoodButton('😊', 3, AppColors.moodGood),
-                              _buildMoodButton('🤩', 4, AppColors.moodAmazing),
+                              _buildMoodButton('😢', 0, colors.moodTerrible),
+                              _buildMoodButton('😕', 1, colors.moodBad),
+                              _buildMoodButton('😐', 2, colors.moodOkay),
+                              _buildMoodButton('😊', 3, colors.moodGood),
+                              _buildMoodButton('🤩', 4, colors.moodAmazing),
                             ],
                           ),
                           if (_todaysMood != null) ...[
@@ -267,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Text(
                                 'Today you feel ${_todaysMood!.label.toLowerCase()}',
                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textSecondary,
+                                      color: colors.textSecondary,
                                       fontStyle: FontStyle.italic,
                                     ),
                               ),
@@ -286,8 +291,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             'Goals',
                             StorageService.getAllVisionboards().length.toString(),
                             Icons.star_rounded,
-                            AppColors.accentGold,
+                            colors.accentGold,
                             3, // Goals page index
+                            colors,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -296,8 +302,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             'Notes',
                             StorageService.getAllNotes().length.toString(),
                             Icons.edit_note_rounded,
-                            AppColors.secondary,
+                            colors.secondary,
                             2, // Notes page index
+                            colors,
                           ),
                         ),
                       ],
@@ -318,20 +325,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: AppColors.surface,
+                          color: colors.surface,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Center(
                           child: Text(
                             'No notes yet. Start journaling!',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: colors.textSecondary,
                                 ),
                           ),
                         ),
                       )
                     else
-                      ..._recentNotes.map((note) => _buildNoteCard(note)),
+                      ..._recentNotes.map((note) => _buildNoteCard(note, colors)),
                   ],
                 ),
               ),
@@ -345,6 +352,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildMoodButton(String emoji, int level, Color color) {
     final isSelected = _todaysMood?.moodLevel == level;
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final colors = appProvider.currentThemeColors;
 
     return GestureDetector(
       onTap: () => _setMood(level),
@@ -352,7 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
         width: 56,
         height: 56,
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.2) : AppColors.surfaceVariant,
+          color: isSelected ? color.withOpacity(0.2) : colors.surfaceVariant,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? color : Colors.transparent,
@@ -369,7 +378,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color, int pageIndex) {
+  Widget _buildStatCard(String label, String value, IconData icon, Color color, int pageIndex, colors) {
     return InkWell(
       onTap: () {
         if (widget.onNavigate != null) {
@@ -380,11 +389,11 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: AppColors.shadow,
+              color: colors.shadow,
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -398,13 +407,13 @@ class _HomeScreenState extends State<HomeScreen> {
               value,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
             ),
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
             ),
           ],
@@ -413,37 +422,37 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildNoteCard(Note note) {
+  Widget _buildNoteCard(Note note, colors) {
     IconData icon;
     Color iconColor;
 
     switch (note.noteType) {
       case 0: // journal
         icon = Icons.menu_book_rounded;
-        iconColor = AppColors.primary;
+        iconColor = colors.primary;
         break;
       case 1: // affirmation
         icon = Icons.favorite_rounded;
-        iconColor = AppColors.accentGold;
+        iconColor = colors.accentGold;
         break;
       case 2: // todo
         icon = Icons.check_circle_outline_rounded;
-        iconColor = AppColors.secondary;
+        iconColor = colors.secondary;
         break;
       default:
         icon = Icons.note_rounded;
-        iconColor = AppColors.textSecondary;
+        iconColor = colors.textSecondary;
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow,
+            color: colors.shadow,
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),

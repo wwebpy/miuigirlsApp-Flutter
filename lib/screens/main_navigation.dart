@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../core/constants/app_colors.dart';
+import '../providers/app_provider.dart';
 import 'home/home_screen.dart';
 import 'goals/goals_screen.dart';
 import 'notes/notes_screen.dart';
@@ -28,6 +30,9 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final appProvider = Provider.of<AppProvider>(context);
+    final colors = appProvider.currentThemeColors;
+
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
@@ -35,10 +40,10 @@ class _MainNavigationState extends State<MainNavigation> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: colors.surface,
           boxShadow: [
             BoxShadow(
-              color: AppColors.shadow,
+              color: colors.shadow,
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
@@ -55,6 +60,7 @@ class _MainNavigationState extends State<MainNavigation> {
                     icon: Icons.home_rounded,
                     label: 'Home',
                     index: 0,
+                    colors: colors,
                   ),
                 ),
                 Expanded(
@@ -62,6 +68,7 @@ class _MainNavigationState extends State<MainNavigation> {
                     icon: Icons.checklist_rounded,
                     label: 'ToDos',
                     index: 1,
+                    colors: colors,
                   ),
                 ),
                 Expanded(
@@ -69,6 +76,7 @@ class _MainNavigationState extends State<MainNavigation> {
                     icon: Icons.edit_note_rounded,
                     label: 'Notes',
                     index: 2,
+                    colors: colors,
                   ),
                 ),
                 Expanded(
@@ -76,6 +84,7 @@ class _MainNavigationState extends State<MainNavigation> {
                     icon: Icons.star_rounded,
                     label: 'Goals',
                     index: 3,
+                    colors: colors,
                   ),
                 ),
               ],
@@ -90,6 +99,7 @@ class _MainNavigationState extends State<MainNavigation> {
     required IconData icon,
     required String label,
     required int index,
+    required colors,
   }) {
     final isSelected = _currentIndex == index;
 
@@ -104,7 +114,7 @@ class _MainNavigationState extends State<MainNavigation> {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withOpacity(0.15)
+              ? colors.primary.withOpacity(0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -114,7 +124,7 @@ class _MainNavigationState extends State<MainNavigation> {
           children: [
             Icon(
               icon,
-              color: isSelected ? AppColors.primary : AppColors.textSecondary,
+              color: isSelected ? colors.primary : colors.textSecondary,
               size: 26,
             ),
             const SizedBox(height: 4),
@@ -123,7 +133,7 @@ class _MainNavigationState extends State<MainNavigation> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: isSelected ? colors.primary : colors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
