@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/note.dart';
 import '../../services/storage_service.dart';
+import '../../providers/app_provider.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key});
@@ -97,6 +99,9 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   Future<void> _deleteJournal(Note note) async {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final colors = appProvider.currentThemeColors;
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -110,7 +115,7 @@ class _NotesScreenState extends State<NotesScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            style: ElevatedButton.styleFrom(backgroundColor: colors.error),
             child: const Text('Delete'),
           ),
         ],
@@ -125,8 +130,11 @@ class _NotesScreenState extends State<NotesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appProvider = Provider.of<AppProvider>(context);
+    final colors = appProvider.currentThemeColors;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Journal'),
         actions: [
@@ -144,13 +152,13 @@ class _NotesScreenState extends State<NotesScreen> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLight.withOpacity(0.3),
+                      color: colors.primaryLight.withOpacity(0.3),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.menu_book_rounded,
                       size: 64,
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -167,7 +175,7 @@ class _NotesScreenState extends State<NotesScreen> {
                       'Start journaling to track your thoughts and experiences.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                     ),
                   ),
@@ -185,22 +193,22 @@ class _NotesScreenState extends State<NotesScreen> {
               itemCount: _journals.length,
               itemBuilder: (context, index) {
                 final journal = _journals[index];
-                return _buildJournalCard(journal);
+                return _buildJournalCard(journal, colors);
               },
             ),
     );
   }
 
-  Widget _buildJournalCard(Note journal) {
+  Widget _buildJournalCard(Note journal, colors) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow,
+            color: colors.shadow,
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -211,12 +219,12 @@ class _NotesScreenState extends State<NotesScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.15),
+              color: colors.primary.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.menu_book_rounded,
-              color: AppColors.primary,
+              color: colors.primary,
               size: 24,
             ),
           ),
@@ -235,7 +243,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 Text(
                   journal.content,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -244,7 +252,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 Text(
                   _formatDate(journal.createdAt),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textHint,
+                        color: colors.textSecondary,
                         fontSize: 11,
                       ),
                 ),
@@ -253,7 +261,7 @@ class _NotesScreenState extends State<NotesScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline_rounded),
-            color: AppColors.error,
+            color: colors.error,
             onPressed: () => _deleteJournal(journal),
           ),
         ],

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/reminder.dart';
 import '../../services/storage_service.dart';
 import '../../services/notification_service.dart';
+import '../../providers/app_provider.dart';
 
 class RemindersScreen extends StatefulWidget {
   const RemindersScreen({super.key});
@@ -28,6 +30,9 @@ class _RemindersScreenState extends State<RemindersScreen> {
   }
 
   Future<void> _createReminder() async {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final colors = appProvider.currentThemeColors;
+
     final titleController = TextEditingController();
     final descController = TextEditingController();
     TimeOfDay selectedTime = TimeOfDay.now();
@@ -86,7 +91,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
+                      color: colors.surfaceVariant,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -110,13 +115,13 @@ class _RemindersScreenState extends State<RemindersScreen> {
                 Wrap(
                   spacing: 8,
                   children: [
-                    _buildDayChip('Mon', 1, selectedDays, setStateDialog),
-                    _buildDayChip('Tue', 2, selectedDays, setStateDialog),
-                    _buildDayChip('Wed', 3, selectedDays, setStateDialog),
-                    _buildDayChip('Thu', 4, selectedDays, setStateDialog),
-                    _buildDayChip('Fri', 5, selectedDays, setStateDialog),
-                    _buildDayChip('Sat', 6, selectedDays, setStateDialog),
-                    _buildDayChip('Sun', 7, selectedDays, setStateDialog),
+                    _buildDayChip('Mon', 1, selectedDays, setStateDialog, colors),
+                    _buildDayChip('Tue', 2, selectedDays, setStateDialog, colors),
+                    _buildDayChip('Wed', 3, selectedDays, setStateDialog, colors),
+                    _buildDayChip('Thu', 4, selectedDays, setStateDialog, colors),
+                    _buildDayChip('Fri', 5, selectedDays, setStateDialog, colors),
+                    _buildDayChip('Sat', 6, selectedDays, setStateDialog, colors),
+                    _buildDayChip('Sun', 7, selectedDays, setStateDialog, colors),
                   ],
                 ),
               ],
@@ -176,6 +181,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
     int day,
     List<int> selectedDays,
     StateSetter setStateDialog,
+    colors,
   ) {
     final isSelected = selectedDays.contains(day);
     return FilterChip(
@@ -190,8 +196,8 @@ class _RemindersScreenState extends State<RemindersScreen> {
           }
         });
       },
-      selectedColor: AppColors.primary.withOpacity(0.3),
-      checkmarkColor: AppColors.primary,
+      selectedColor: colors.primary.withOpacity(0.3),
+      checkmarkColor: colors.primary,
     );
   }
 
@@ -221,6 +227,9 @@ class _RemindersScreenState extends State<RemindersScreen> {
   }
 
   Future<void> _deleteReminder(Reminder reminder) async {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final colors = appProvider.currentThemeColors;
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -234,7 +243,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            style: ElevatedButton.styleFrom(backgroundColor: colors.error),
             child: const Text('Delete'),
           ),
         ],
@@ -250,8 +259,11 @@ class _RemindersScreenState extends State<RemindersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appProvider = Provider.of<AppProvider>(context);
+    final colors = appProvider.currentThemeColors;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Reminders'),
         actions: [
@@ -269,13 +281,13 @@ class _RemindersScreenState extends State<RemindersScreen> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLight.withOpacity(0.3),
+                      color: colors.primaryLight.withOpacity(0.3),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.notifications_rounded,
                       size: 64,
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -292,7 +304,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                       'Create reminders for daily routines, affirmations, and goals!',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                     ),
                   ),
@@ -310,22 +322,22 @@ class _RemindersScreenState extends State<RemindersScreen> {
               itemCount: _reminders.length,
               itemBuilder: (context, index) {
                 final reminder = _reminders[index];
-                return _buildReminderCard(reminder);
+                return _buildReminderCard(reminder, colors);
               },
             ),
     );
   }
 
-  Widget _buildReminderCard(Reminder reminder) {
+  Widget _buildReminderCard(Reminder reminder, colors) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow,
+            color: colors.shadow,
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -338,13 +350,13 @@ class _RemindersScreenState extends State<RemindersScreen> {
             height: 56,
             decoration: BoxDecoration(
               color: reminder.isActive
-                  ? AppColors.primary.withOpacity(0.15)
-                  : AppColors.surfaceVariant,
+                  ? colors.primary.withOpacity(0.15)
+                  : colors.surfaceVariant,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
               Icons.notifications_rounded,
-              color: reminder.isActive ? AppColors.primary : AppColors.textSecondary,
+              color: reminder.isActive ? colors.primary : colors.textSecondary,
               size: 28,
             ),
           ),
@@ -358,8 +370,8 @@ class _RemindersScreenState extends State<RemindersScreen> {
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: reminder.isActive
-                            ? AppColors.textPrimary
-                            : AppColors.textSecondary,
+                            ? colors.textPrimary
+                            : colors.textSecondary,
                       ),
                 ),
                 const SizedBox(height: 4),
@@ -368,13 +380,13 @@ class _RemindersScreenState extends State<RemindersScreen> {
                     Icon(
                       Icons.access_time_rounded,
                       size: 14,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       TimeOfDay.fromDateTime(reminder.time).format(context),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                     ),
                     if (reminder.isRepeating) ...[
@@ -382,13 +394,13 @@ class _RemindersScreenState extends State<RemindersScreen> {
                       Icon(
                         Icons.repeat_rounded,
                         size: 14,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         reminder.repeatDaysText,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
+                              color: colors.textSecondary,
                             ),
                       ),
                     ],
@@ -399,7 +411,7 @@ class _RemindersScreenState extends State<RemindersScreen> {
                   Text(
                     reminder.description!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textHint,
+                          color: colors.textSecondary,
                         ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -413,11 +425,11 @@ class _RemindersScreenState extends State<RemindersScreen> {
               Switch(
                 value: reminder.isActive,
                 onChanged: (_) => _toggleReminder(reminder),
-                activeTrackColor: AppColors.primary,
+                activeColor: colors.primary,
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline_rounded),
-                color: AppColors.error,
+                color: colors.error,
                 iconSize: 20,
                 onPressed: () => _deleteReminder(reminder),
               ),

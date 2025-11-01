@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/visionboard.dart';
 import '../../services/storage_service.dart';
+import '../../providers/app_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -96,6 +98,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
   }
 
   Future<void> _deleteVisionboard(Visionboard visionboard) async {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final colors = appProvider.currentThemeColors;
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -110,7 +115,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
+              backgroundColor: colors.error,
             ),
             child: const Text('Delete'),
           ),
@@ -148,8 +153,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final appProvider = Provider.of<AppProvider>(context);
+    final colors = appProvider.currentThemeColors;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Goals & Vision'),
         actions: [
@@ -167,13 +175,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryLight.withOpacity(0.3),
+                      color: colors.primaryLight.withOpacity(0.3),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.star_rounded,
                       size: 64,
-                      color: AppColors.primary,
+                      color: colors.primary,
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -190,7 +198,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       'Create your first visionboard to visualize your dreams and goals!',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                     ),
                   ),
@@ -214,22 +222,22 @@ class _GoalsScreenState extends State<GoalsScreen> {
               itemCount: _visionboards.length,
               itemBuilder: (context, index) {
                 final visionboard = _visionboards[index];
-                return _buildVisionboardCard(visionboard);
+                return _buildVisionboardCard(visionboard, colors);
               },
             ),
     );
   }
 
-  Widget _buildVisionboardCard(Visionboard visionboard) {
+  Widget _buildVisionboardCard(Visionboard visionboard, colors) {
     return GestureDetector(
       onTap: () => _showVisionboardDetail(visionboard),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: AppColors.shadow,
+              color: colors.shadow,
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -242,7 +250,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight.withOpacity(0.2),
+                  color: colors.primaryLight.withOpacity(0.2),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
@@ -253,7 +261,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                         child: Icon(
                           Icons.add_photo_alternate_rounded,
                           size: 48,
-                          color: AppColors.primary.withOpacity(0.5),
+                          color: colors.primary.withOpacity(0.5),
                         ),
                       )
                     : ClipRRect(
@@ -272,7 +280,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                                 child: Icon(
                                   Icons.broken_image_rounded,
                                   size: 48,
-                                  color: AppColors.textSecondary,
+                                  color: colors.textSecondary,
                                 ),
                               ),
                             ),
@@ -323,7 +331,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                     Text(
                       visionboard.description!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -339,15 +347,18 @@ class _GoalsScreenState extends State<GoalsScreen> {
   }
 
   void _showVisionboardDetail(Visionboard visionboard) {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final colors = appProvider.currentThemeColors;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.85,
-        decoration: const BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.only(
+        decoration: BoxDecoration(
+          color: colors.background,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(30),
             topRight: Radius.circular(30),
           ),
@@ -360,7 +371,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.divider,
+                color: colors.textSecondary.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -383,7 +394,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                           Text(
                             visionboard.description!,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: colors.textSecondary,
                                 ),
                           ),
                       ],
@@ -411,11 +422,11 @@ class _GoalsScreenState extends State<GoalsScreen> {
                         },
                       ),
                       PopupMenuItem(
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(Icons.delete_rounded, color: AppColors.error),
-                            SizedBox(width: 12),
-                            Text('Delete', style: TextStyle(color: AppColors.error)),
+                            Icon(Icons.delete_rounded, color: colors.error),
+                            const SizedBox(width: 12),
+                            Text('Delete', style: TextStyle(color: colors.error)),
                           ],
                         ),
                         onTap: () {
@@ -440,13 +451,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
                           Icon(
                             Icons.add_photo_alternate_rounded,
                             size: 64,
-                            color: AppColors.textSecondary.withOpacity(0.5),
+                            color: colors.textSecondary.withOpacity(0.5),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'No images yet',
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: AppColors.textSecondary,
+                                  color: colors.textSecondary,
                                 ),
                           ),
                           const SizedBox(height: 24),
@@ -476,10 +487,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
                             File(visionboard.imagePaths[index]),
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) => Container(
-                              color: AppColors.surfaceVariant,
+                              color: colors.surfaceVariant,
                               child: Icon(
                                 Icons.broken_image_rounded,
-                                color: AppColors.textSecondary,
+                                color: colors.textSecondary,
                               ),
                             ),
                           ),
