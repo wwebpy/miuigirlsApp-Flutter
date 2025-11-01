@@ -1,4 +1,4 @@
-# Miuul Girls - Daily Motivation Companion
+# Miui - Daily Motivation Companion
 
 A beautiful iOS app designed to empower and inspire women through daily motivation, journaling, goal visualization, and mindful reminders.
 
