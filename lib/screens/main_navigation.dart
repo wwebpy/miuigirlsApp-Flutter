@@ -17,9 +17,9 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const GoalsScreen(),
-    const NotesScreen(),
     const RemindersScreen(),
+    const NotesScreen(),
+    const GoalsScreen(),
   ];
 
   @override
@@ -52,8 +52,8 @@ class _MainNavigationState extends State<MainNavigation> {
                   index: 0,
                 ),
                 _buildNavItem(
-                  icon: Icons.star_rounded,
-                  label: 'Goals',
+                  icon: Icons.notifications_rounded,
+                  label: 'Reminders',
                   index: 1,
                 ),
                 _buildNavItem(
@@ -62,8 +62,8 @@ class _MainNavigationState extends State<MainNavigation> {
                   index: 2,
                 ),
                 _buildNavItem(
-                  icon: Icons.notifications_rounded,
-                  label: 'Reminders',
+                  icon: Icons.star_rounded,
+                  label: 'Goals',
                   index: 3,
                 ),
               ],
