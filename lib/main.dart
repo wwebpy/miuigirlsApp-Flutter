@@ -7,6 +7,7 @@ import 'services/notification_service.dart';
 import 'services/preferences_service.dart';
 import 'providers/app_provider.dart';
 import 'screens/main_navigation.dart';
+import 'screens/welcome/welcome_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,11 +37,13 @@ class MyApp extends StatelessWidget {
       create: (_) => AppProvider(),
       child: Consumer<AppProvider>(
         builder: (context, appProvider, _) {
+          final bool isOnboardingCompleted = PreferencesService.isOnboardingCompleted();
+
           return MaterialApp(
             title: 'Miui',
             debugShowCheckedModeBanner: false,
             theme: appProvider.currentThemeData,
-            home: const MainNavigation(),
+            home: isOnboardingCompleted ? const MainNavigation() : const WelcomeScreen(),
           );
         },
       ),

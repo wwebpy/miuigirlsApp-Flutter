@@ -4,6 +4,7 @@ class PreferencesService {
   static const String _prefsBox = 'preferences';
   static const String _themeKey = 'selected_theme';
   static const String _languageKey = 'selected_language';
+  static const String _onboardingKey = 'onboarding_completed';
 
   static Box get _prefs => Hive.box(_prefsBox);
 
@@ -27,5 +28,14 @@ class PreferencesService {
 
   static Future<void> setLanguage(String languageCode) async {
     await _prefs.put(_languageKey, languageCode);
+  }
+
+  // Onboarding
+  static bool isOnboardingCompleted() {
+    return _prefs.get(_onboardingKey, defaultValue: false) as bool;
+  }
+
+  static Future<void> setOnboardingCompleted(bool completed) async {
+    await _prefs.put(_onboardingKey, completed);
   }
 }
