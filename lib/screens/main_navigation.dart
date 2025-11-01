@@ -46,25 +46,33 @@ class _MainNavigationState extends State<MainNavigation> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(
-                  icon: Icons.home_rounded,
-                  label: 'Home',
-                  index: 0,
+                Expanded(
+                  child: _buildNavItem(
+                    icon: Icons.home_rounded,
+                    label: 'Home',
+                    index: 0,
+                  ),
                 ),
-                _buildNavItem(
-                  icon: Icons.notifications_rounded,
-                  label: 'Reminders',
-                  index: 1,
+                Expanded(
+                  child: _buildNavItem(
+                    icon: Icons.checklist_rounded,
+                    label: 'ToDos',
+                    index: 1,
+                  ),
                 ),
-                _buildNavItem(
-                  icon: Icons.edit_note_rounded,
-                  label: 'Notes',
-                  index: 2,
+                Expanded(
+                  child: _buildNavItem(
+                    icon: Icons.edit_note_rounded,
+                    label: 'Notes',
+                    index: 2,
+                  ),
                 ),
-                _buildNavItem(
-                  icon: Icons.star_rounded,
-                  label: 'Goals',
-                  index: 3,
+                Expanded(
+                  child: _buildNavItem(
+                    icon: Icons.star_rounded,
+                    label: 'Goals',
+                    index: 3,
+                  ),
                 ),
               ],
             ),
@@ -89,7 +97,7 @@ class _MainNavigationState extends State<MainNavigation> {
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary.withOpacity(0.15)
@@ -98,6 +106,7 @@ class _MainNavigationState extends State<MainNavigation> {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
@@ -112,6 +121,7 @@ class _MainNavigationState extends State<MainNavigation> {
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 color: isSelected ? AppColors.primary : AppColors.textSecondary,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
