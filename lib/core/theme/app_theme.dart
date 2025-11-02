@@ -20,59 +20,65 @@ class AppTheme {
       scaffoldBackgroundColor: colors.background,
 
       // Typography
-      textTheme: GoogleFonts.poppinsTextTheme().copyWith(
-        displayLarge: GoogleFonts.poppins(
-          fontSize: 32,
-          fontWeight: FontWeight.w700,
+      textTheme: GoogleFonts.playfairDisplayTextTheme().copyWith(
+        displayLarge: GoogleFonts.playfairDisplay(
+          fontSize: 36,
+          fontWeight: FontWeight.w900,
           color: colors.textPrimary,
           letterSpacing: -0.5,
+          height: 1.15,
         ),
-        displayMedium: GoogleFonts.poppins(
+        displayMedium: GoogleFonts.playfairDisplay(
+          fontSize: 32,
+          fontWeight: FontWeight.w800,
+          color: colors.textPrimary,
+          height: 1.15,
+        ),
+        displaySmall: GoogleFonts.playfairDisplay(
           fontSize: 28,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: colors.textPrimary,
+          height: 1.15,
         ),
-        displaySmall: GoogleFonts.poppins(
+        headlineLarge: GoogleFonts.playfairDisplay(
+          fontSize: 26,
+          fontWeight: FontWeight.w700,
+          color: colors.textPrimary,
+          height: 1.15,
+        ),
+        headlineMedium: GoogleFonts.playfairDisplay(
           fontSize: 24,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: colors.textPrimary,
+          height: 1.15,
         ),
-        headlineLarge: GoogleFonts.poppins(
-          fontSize: 22,
-          fontWeight: FontWeight.w600,
-          color: colors.textPrimary,
-        ),
-        headlineMedium: GoogleFonts.poppins(
+        headlineSmall: GoogleFonts.playfairDisplay(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: colors.textPrimary,
+          height: 1.15,
         ),
-        headlineSmall: GoogleFonts.poppins(
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
-          color: colors.textPrimary,
-        ),
-        bodyLarge: GoogleFonts.poppins(
+        bodyLarge: GoogleFonts.playfairDisplay(
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: colors.textPrimary,
         ),
-        bodyMedium: GoogleFonts.poppins(
+        bodyMedium: GoogleFonts.playfairDisplay(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: colors.textPrimary,
         ),
-        bodySmall: GoogleFonts.poppins(
+        bodySmall: GoogleFonts.playfairDisplay(
           fontSize: 12,
           fontWeight: FontWeight.w400,
           color: colors.textSecondary,
         ),
-        labelLarge: GoogleFonts.poppins(
+        labelLarge: GoogleFonts.playfairDisplay(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: colors.textPrimary,
         ),
-        labelMedium: GoogleFonts.poppins(
+        labelMedium: GoogleFonts.playfairDisplay(
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: colors.textSecondary,
@@ -85,7 +91,7 @@ class AppTheme {
         centerTitle: false,
         backgroundColor: colors.background,
         foregroundColor: colors.textPrimary,
-        titleTextStyle: GoogleFonts.poppins(
+        titleTextStyle: GoogleFonts.playfairDisplay(
           fontSize: 24,
           fontWeight: FontWeight.w600,
           color: colors.textPrimary,
@@ -113,7 +119,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.poppins(
+          textStyle: GoogleFonts.playfairDisplay(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -137,7 +143,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: colors.primary, width: 2),
         ),
-        hintStyle: GoogleFonts.poppins(
+        hintStyle: GoogleFonts.playfairDisplay(
           color: colors.textSecondary,
           fontSize: 14,
         ),
@@ -181,59 +187,65 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
 
       // Typography
-      textTheme: GoogleFonts.poppinsTextTheme().copyWith(
-        displayLarge: GoogleFonts.poppins(
-          fontSize: 32,
-          fontWeight: FontWeight.w700,
+      textTheme: GoogleFonts.playfairDisplayTextTheme().copyWith(
+        displayLarge: GoogleFonts.playfairDisplay(
+          fontSize: 36,
+          fontWeight: FontWeight.w900,
           color: AppColors.textPrimary,
           letterSpacing: -0.5,
+          height: 1.15,
         ),
-        displayMedium: GoogleFonts.poppins(
+        displayMedium: GoogleFonts.playfairDisplay(
+          fontSize: 32,
+          fontWeight: FontWeight.w800,
+          color: AppColors.textPrimary,
+          height: 1.15,
+        ),
+        displaySmall: GoogleFonts.playfairDisplay(
           fontSize: 28,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
+          height: 1.15,
         ),
-        displaySmall: GoogleFonts.poppins(
+        headlineLarge: GoogleFonts.playfairDisplay(
+          fontSize: 26,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+          height: 1.15,
+        ),
+        headlineMedium: GoogleFonts.playfairDisplay(
           fontSize: 24,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
+          height: 1.15,
         ),
-        headlineLarge: GoogleFonts.poppins(
-          fontSize: 22,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
-        ),
-        headlineMedium: GoogleFonts.poppins(
+        headlineSmall: GoogleFonts.playfairDisplay(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
+          height: 1.15,
         ),
-        headlineSmall: GoogleFonts.poppins(
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
-          color: AppColors.textPrimary,
-        ),
-        bodyLarge: GoogleFonts.poppins(
+        bodyLarge: GoogleFonts.playfairDisplay(
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
         ),
-        bodyMedium: GoogleFonts.poppins(
+        bodyMedium: GoogleFonts.playfairDisplay(
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
         ),
-        bodySmall: GoogleFonts.poppins(
+        bodySmall: GoogleFonts.playfairDisplay(
           fontSize: 12,
           fontWeight: FontWeight.w400,
           color: AppColors.textSecondary,
         ),
-        labelLarge: GoogleFonts.poppins(
+        labelLarge: GoogleFonts.playfairDisplay(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,
         ),
-        labelMedium: GoogleFonts.poppins(
+        labelMedium: GoogleFonts.playfairDisplay(
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: AppColors.textSecondary,
@@ -246,7 +258,7 @@ class AppTheme {
         centerTitle: false,
         backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
-        titleTextStyle: GoogleFonts.poppins(
+        titleTextStyle: GoogleFonts.playfairDisplay(
           fontSize: 24,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
@@ -274,7 +286,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.poppins(
+          textStyle: GoogleFonts.playfairDisplay(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -298,7 +310,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
-        hintStyle: GoogleFonts.poppins(
+        hintStyle: GoogleFonts.playfairDisplay(
           color: AppColors.textHint,
           fontSize: 14,
         ),

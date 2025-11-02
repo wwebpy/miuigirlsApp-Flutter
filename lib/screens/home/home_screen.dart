@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:provider/provider.dart';
+import 'dart:math' as math;
 import '../../core/constants/app_colors.dart';
 import '../../models/mood.dart';
 import '../../models/note.dart';
@@ -17,14 +18,33 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Mood? _todaysMood;
   List<Note> _recentNotes = [];
+  late AnimationController _animationController;
+  late AnimationController _pulseController;
+  int? _selectedMoodIndex;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..forward();
+
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _pulseController.dispose();
+    super.dispose();
   }
 
   void _loadData() {
@@ -56,16 +76,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<String> get _motivations => [
-        'You are stronger than you think. Keep going!',
-        'Every day is a fresh start. Make it count.',
-        'Believe in yourself and magic will happen.',
-        'Your potential is endless. Go chase your dreams.',
-        'You deserve all the good things coming your way.',
-        'Small steps every day lead to big changes.',
-        'You are capable of amazing things.',
-        'Trust the process. Your time is coming.',
-        'Be proud of how far you have come.',
-        'Your vibe attracts your tribe. Stay positive.',
+        'You are stronger than you think',
+        'Every day is a fresh start',
+        'Believe in yourself and magic will happen',
+        'Your potential is endless',
+        'You deserve all the good things',
+        'Small steps lead to big changes',
+        'You are capable of amazing things',
+        'Trust the process',
+        'Be proud of how far you have come',
+        'Your vibe attracts your tribe',
       ];
 
   String _getDailyMotivation() {
@@ -81,23 +101,31 @@ class _HomeScreenState extends State<HomeScreen> {
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: colors.surface,
         title: Row(
           children: [
-            Text(
-              Mood(
-                id: '',
-                moodLevel: moodLevel,
-                date: DateTime.now(),
-              ).emoji,
-              style: const TextStyle(fontSize: 32),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: _getMoodColor(moodLevel).withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  Mood(id: '', moodLevel: moodLevel, date: DateTime.now()).emoji,
+                  style: const TextStyle(fontSize: 28),
+                ),
+              ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Expanded(
               child: Text(
                 'How are you feeling?',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      color: colors.textPrimary,
                     ),
               ),
             ),
@@ -113,20 +141,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: colors.textSecondary,
                   ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             TextField(
               controller: noteController,
               decoration: InputDecoration(
-                hintText: 'What\'s on your mind?',
+                hintText: 'Share your thoughts...',
                 hintStyle: TextStyle(color: colors.textSecondary.withOpacity(0.5)),
+                filled: true,
+                fillColor: colors.background,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: colors.textSecondary.withOpacity(0.3)),
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(color: colors.primary, width: 2),
                 ),
+                contentPadding: const EdgeInsets.all(16),
               ),
               maxLines: 4,
               autofocus: true,
@@ -143,6 +174,11 @@ class _HomeScreenState extends State<HomeScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.primary,
               foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
             ),
             child: const Text('Save'),
           ),
@@ -165,9 +201,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Mood saved!'),
-            duration: Duration(seconds: 1),
+          SnackBar(
+            content: const Text('Mood saved!'),
+            backgroundColor: colors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -180,393 +219,99 @@ class _HomeScreenState extends State<HomeScreen> {
     final colors = appProvider.currentThemeColors;
 
     return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Greeting with Profile Icon
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Text(
-                                _getGreeting(),
-                                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(_getGreetingEmoji(), style: const TextStyle(fontSize: 28)),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          icon: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: colors.primary.withOpacity(0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.person_rounded,
-                              color: colors.primary,
-                              size: 22,
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SettingsScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Ready to make today amazing?',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: colors.textSecondary,
-                          ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Daily Motivation Card
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [colors.primary, colors.primaryLight],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colors.primary.withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Icon(
-                                  Icons.auto_awesome_rounded,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                'Daily Motivation',
-                                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _getDailyMotivation(),
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.4,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Mood Check
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: colors.shadow,
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.sentiment_satisfied_alt_rounded,
-                                color: colors.primary,
-                                size: 24,
-                              ),
-                              const SizedBox(width: 10),
-                              Text(
-                                'How are you feeling today?',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              _buildMoodButton('😢', 0, colors.moodTerrible),
-                              _buildMoodButton('😕', 1, colors.moodBad),
-                              _buildMoodButton('😐', 2, colors.moodOkay),
-                              _buildMoodButton('😊', 3, colors.moodGood),
-                              _buildMoodButton('🤩', 4, colors.moodAmazing),
-                            ],
-                          ),
-                          if (_todaysMood != null) ...[
-                            const SizedBox(height: 12),
-                            Center(
-                              child: Text(
-                                'Today you feel ${_todaysMood!.label.toLowerCase()}',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: colors.textSecondary,
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Quick Stats
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            'Goals',
-                            StorageService.getAllVisionboards().length.toString(),
-                            Icons.star_rounded,
-                            colors.accentGold,
-                            3, // Goals page index
-                            colors,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildStatCard(
-                            'Notes',
-                            StorageService.getAllNotes().length.toString(),
-                            Icons.edit_note_rounded,
-                            colors.secondary,
-                            2, // Notes page index
-                            colors,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Recent Activity Header
-                    Text(
-                      'Recent Activity',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // Recent Notes
-                    if (_recentNotes.isEmpty)
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: colors.surface,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'No notes yet. Start journaling!',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: colors.textSecondary,
-                                ),
-                          ),
-                        ),
-                      )
-                    else
-                      ..._recentNotes.map((note) => _buildNoteCard(note, colors)),
-                  ],
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMoodButton(String emoji, int level, Color color) {
-    final isSelected = _todaysMood?.moodLevel == level;
-    final appProvider = Provider.of<AppProvider>(context, listen: false);
-    final colors = appProvider.currentThemeColors;
-
-    return GestureDetector(
-      onTap: () => _setMood(level),
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.2) : colors.surfaceVariant,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? color : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            emoji,
-            style: TextStyle(fontSize: isSelected ? 32 : 28),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String label, String value, IconData icon, Color color, int pageIndex, colors) {
-    return InkWell(
-      onTap: () {
-        if (widget.onNavigate != null) {
-          widget.onNavigate!(pageIndex);
-        }
-      },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: colors.shadow,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: colors.textPrimary,
-                  ),
-            ),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colors.textSecondary,
-                  ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNoteCard(Note note, colors) {
-    IconData icon;
-    Color iconColor;
-
-    switch (note.noteType) {
-      case 0: // journal
-        icon = Icons.menu_book_rounded;
-        iconColor = colors.primary;
-        break;
-      case 1: // affirmation
-        icon = Icons.favorite_rounded;
-        iconColor = colors.accentGold;
-        break;
-      case 2: // todo
-        icon = Icons.check_circle_outline_rounded;
-        iconColor = colors.secondary;
-        break;
-      default:
-        icon = Icons.note_rounded;
-        iconColor = colors.textSecondary;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: colors.shadow,
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
+      body: Stack(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: iconColor, size: 20),
+          // Background with organic shapes
+          CustomPaint(
+            painter: OrganicShapesPainter(colors: colors),
+            child: Container(),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  note.title,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
+
+          // Main content
+          SafeArea(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                // Header with greeting
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _animationController,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Profile Button (without pill background)
+                          IconButton(
+                            icon: Icon(Icons.person_rounded, color: colors.primary, size: 28),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                              );
+                            },
+                          ),
+
+                          // Greeting Pill (Center)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: colors.surface.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(color: colors.primary.withOpacity(0.2), width: 1),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colors.shadow.withOpacity(0.1),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _getGreetingEmoji(),
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _getGreeting(),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.textPrimary,
+                                    letterSpacing: 0.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Notifications Button (without pill background)
+                          IconButton(
+                            icon: Icon(Icons.notifications_outlined, color: colors.primary, size: 28),
+                            onPressed: () {
+                              // TODO: Navigate to notifications
+                            },
+                          ),
+                        ],
                       ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  note.content,
-                  style: Theme.of(context).textTheme.bodySmall,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+                // Mood Map Section
+                SliverToBoxAdapter(
+                  child: FadeTransition(
+                    opacity: _animationController,
+                    child: _buildMoodMap(colors),
+                  ),
                 ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 120)),
               ],
             ),
           ),
@@ -574,4 +319,748 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  Color _getMoodColor(int moodLevel) {
+    switch (moodLevel) {
+      case 0:
+        return const Color(0xFFFF6B6B);
+      case 1:
+        return const Color(0xFFFFB347);
+      case 2:
+        return const Color(0xFFFFE66D);
+      case 3:
+        return const Color(0xFFB8E994);
+      case 4:
+        return const Color(0xFFFFD700);
+      default:
+        return Colors.grey;
+    }
+  }
+
+  Map<String, String> _getMoodMessage(int moodLevel) {
+    switch (moodLevel) {
+      case 0:
+        return {'bold': 'Schade,', 'text': 'dass es dir nicht gut geht'};
+      case 1:
+        return {'bold': 'Kopf hoch!', 'text': 'Morgen wird besser'};
+      case 2:
+        return {'bold': 'Okay', 'text': 'ist auch in Ordnung'};
+      case 3:
+        return {'bold': 'Wunderbar!', 'text': 'Schön, dass es dir gut geht'};
+      case 4:
+        return {'bold': 'Fantastisch!', 'text': 'Du strahlst heute'};
+      default:
+        return {'bold': 'Hallo', 'text': 'wie geht es dir?'};
+    }
+  }
+
+  Widget _buildMoodMap(colors) {
+    final moodData = [
+      {'label': 'Terrible', 'emoji': '😢', 'color': const Color(0xFFFF6B6B), 'level': 0},
+      {'label': 'Not Great', 'emoji': '😕', 'color': const Color(0xFFFFB347), 'level': 1},
+      {'label': 'Okay', 'emoji': '😐', 'color': const Color(0xFFFFE66D), 'level': 2},
+      {'label': 'Good', 'emoji': '😊', 'color': const Color(0xFFB8E994), 'level': 3},
+      {'label': 'Amazing', 'emoji': '🤩', 'color': const Color(0xFFFFD700), 'level': 4},
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          // Title
+          Center(
+            child: Text(
+              'How are you feeling?',
+              style: TextStyle(
+                fontSize: 38,
+                fontWeight: FontWeight.w900,
+                color: colors.textPrimary,
+                letterSpacing: -1.2,
+                height: 1.05,
+                shadows: [
+                  Shadow(
+                    color: colors.textPrimary.withOpacity(0.3),
+                    offset: const Offset(0, 1),
+                    blurRadius: 2,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 40),
+
+          // Liquid Fill Container
+          Center(
+            child: SizedBox(
+              width: 280,
+              height: 280,
+              child: AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, child) {
+                  // Subtle wobble effect
+                  final wobbleX = math.sin(_pulseController.value * 2 * math.pi) * 2;
+                  final wobbleY = math.cos(_pulseController.value * 2 * math.pi) * 1.5;
+                  final pulseValue = 1.0 + (math.sin(_pulseController.value * 2 * math.pi) * 0.03);
+
+                  return Transform.translate(
+                    offset: Offset(wobbleX, wobbleY),
+                    child: Transform.scale(
+                      scale: pulseValue,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Outer glow rings
+                          if (_todaysMood != null) ...[
+                            Container(
+                              width: 280,
+                              height: 280,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0),
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.15),
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0),
+                                  ],
+                                  stops: const [0.4, 0.7, 1.0],
+                                ),
+                              ),
+                            ),
+                          ],
+
+                          // Main liquid container
+                          Container(
+                            width: 250,
+                            height: 250,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: colors.primary.withOpacity(0.2),
+                                width: 3,
+                              ),
+                              gradient: LinearGradient(
+                                colors: [
+                                  colors.background.withOpacity(0.95),
+                                  colors.surface.withOpacity(0.8),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colors.shadow.withOpacity(0.2),
+                                  blurRadius: 30,
+                                  offset: const Offset(0, 15),
+                                ),
+                                if (_todaysMood != null)
+                                  BoxShadow(
+                                    color: _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.3),
+                                    blurRadius: 40,
+                                    offset: const Offset(0, 10),
+                                  ),
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: Stack(
+                                children: [
+                                  // Background gradient
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          colors.background.withOpacity(0.95),
+                                          colors.surface.withOpacity(0.5),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                    ),
+                                  ),
+                                  // Liquid fill with wave effect
+                                  if (_todaysMood != null)
+                                    Align(
+                                      alignment: Alignment.bottomCenter,
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 1200),
+                                        curve: Curves.easeInOutCubic,
+                                        height: 250 * ((_todaysMood!.moodLevel + 1) / 5.0),
+                                        child: CustomPaint(
+                                          painter: WavePainter(
+                                            color: _getMoodColor(_todaysMood!.moodLevel),
+                                            waveOffset: _pulseController.value * 2 * math.pi,
+                                          ),
+                                          size: const Size(250, 250),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          // Shine effect
+                          Container(
+                            width: 250,
+                            height: 250,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                center: const Alignment(-0.5, -0.5),
+                                colors: [
+                                  Colors.white.withOpacity(0.15),
+                                  Colors.white.withOpacity(0.05),
+                                  Colors.transparent,
+                                ],
+                                stops: const [0.0, 0.3, 1.0],
+                              ),
+                            ),
+                          ),
+
+                          // Center text with fade-in animation
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 1500),
+                            switchOutCurve: Curves.easeOut,
+                            switchInCurve: Curves.easeInOutCubic,
+                            reverseDuration: const Duration(milliseconds: 200),
+                            transitionBuilder: (child, animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(0, 0.1),
+                                    end: Offset.zero,
+                                  ).animate(animation),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: _todaysMood != null
+                                ? Container(
+                                    key: ValueKey(_todaysMood!.moodLevel),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          _getMoodMessage(_todaysMood!.moodLevel)['bold']!,
+                                          style: TextStyle(
+                                            fontSize: 34,
+                                            fontWeight: FontWeight.w900,
+                                            color: colors.textPrimary,
+                                            height: 1.05,
+                                            letterSpacing: -0.8,
+                                            shadows: [
+                                              Shadow(
+                                                color: colors.textPrimary.withOpacity(0.2),
+                                                offset: const Offset(0, 1),
+                                                blurRadius: 1,
+                                              ),
+                                            ],
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          _getMoodMessage(_todaysMood!.moodLevel)['text']!,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w700,
+                                            color: colors.textSecondary,
+                                            height: 1.25,
+                                            letterSpacing: -0.3,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : Container(
+                                    key: const ValueKey('empty'),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                                    child: Text(
+                                      'Wähle dein Mood',
+                                      style: TextStyle(
+                                        fontSize: 21,
+                                        fontWeight: FontWeight.w900,
+                                        color: colors.textSecondary.withOpacity(0.5),
+                                        letterSpacing: -0.5,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 40),
+
+          // Mood buttons row
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            alignment: WrapAlignment.center,
+            children: moodData.map((mood) {
+              final index = mood['level'] as int;
+              final isSelected = _todaysMood?.moodLevel == index;
+              final color = mood['color'] as Color;
+              final label = mood['label'] as String;
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() => _selectedMoodIndex = index);
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    _setMood(index);
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: isSelected
+                        ? LinearGradient(
+                            colors: [color, color.withOpacity(0.7)],
+                          )
+                        : null,
+                    color: isSelected ? null : color.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isSelected ? color : color.withOpacity(0.4),
+                      width: isSelected ? 2 : 1,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: color.withOpacity(0.4),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: -0.5,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.3),
+                          offset: const Offset(0, 1),
+                          blurRadius: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+
+          if (_todaysMood != null) ...[
+            const SizedBox(height: 32),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.15),
+                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.05),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.4),
+                  width: 2,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          _getMoodColor(_todaysMood!.moodLevel),
+                          _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.8),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.4),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        _todaysMood!.emoji,
+                        style: const TextStyle(fontSize: 28),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'You\'re feeling ${_todaysMood!.label.toLowerCase()} today!',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textPrimary,
+                            height: 1.3,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Mood saved ✓',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: _getMoodColor(_todaysMood!.moodLevel),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRadialMoodItem({
+    required String emoji,
+    required String label,
+    required Color color,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) {
+          final pulseValue = isSelected
+              ? 1.0 + (_pulseController.value * 0.12)
+              : 1.0 + (_pulseController.value * 0.05);
+
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+            child: Transform.scale(
+              scale: isSelected ? 1.2 : pulseValue,
+              child: Column(
+                children: [
+                  Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        colors: [
+                          color,
+                          color.withOpacity(0.6),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isSelected ? Colors.white : Colors.transparent,
+                        width: 3,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withOpacity(isSelected ? 0.6 : 0.4),
+                          blurRadius: isSelected ? 24 : 16,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        emoji,
+                        style: TextStyle(
+                          fontSize: isSelected ? 32 : 28,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: isSelected ? 13 : 11,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                      color: isSelected ? color : color.withOpacity(0.8),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMoodBlob({
+    required String label,
+    required Color color,
+    required double size,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) {
+          final pulseValue = isSelected
+              ? 1.0 + (_pulseController.value * 0.15)
+              : 1.0 + (_pulseController.value * 0.08);
+
+          return Transform.scale(
+            scale: isSelected ? 1.15 : 1.0,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOut,
+              child: Column(
+                children: [
+                  Container(
+                    width: size * pulseValue,
+                    height: size * pulseValue,
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        colors: [
+                          color,
+                          color.withOpacity(0.7),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withOpacity(isSelected ? 0.6 : 0.3),
+                          blurRadius: isSelected ? 32 : 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: isSelected
+                        ? Center(
+                            child: Icon(
+                              Icons.favorite_rounded,
+                              color: Colors.white,
+                              size: size * 0.4,
+                            ),
+                          )
+                        : null,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: isSelected ? 15 : 13,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                      color: isSelected ? color : color.withOpacity(0.8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// Custom painter for wave animation
+class WavePainter extends CustomPainter {
+  final Color color;
+  final double waveOffset;
+
+  WavePainter({required this.color, required this.waveOffset});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Main wave with gradient (light on top, dark at bottom)
+    final path = Path();
+    path.moveTo(0, size.height);
+    path.lineTo(0, 20);
+
+    // Create smooth wave
+    for (double i = 0; i <= size.width; i += 0.5) {
+      final wave1 = math.sin((i / size.width * 4 * math.pi) + waveOffset) * 8;
+      final wave2 = math.sin((i / size.width * 2 * math.pi) - waveOffset * 0.5) * 5;
+      final y = 15 + wave1 + wave2;
+      path.lineTo(i, y);
+    }
+
+    path.lineTo(size.width, 20);
+    path.lineTo(size.width, size.height);
+    path.close();
+
+    // Gradient paint - lighter on top, darker at bottom
+    final paint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          _lightenColor(color, 0.3), // Much lighter at top
+          _lightenColor(color, 0.15), // Slightly lighter
+          color, // Original color in middle
+          _darkenColor(color, 0.15), // Slightly darker
+          _darkenColor(color, 0.25), // Darker at bottom
+        ],
+        stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(path, paint);
+
+    // Second wave layer with lighter gradient overlay
+    final path2 = Path();
+    path2.moveTo(0, size.height);
+    path2.lineTo(0, 10);
+
+    for (double i = 0; i <= size.width; i += 0.5) {
+      final wave1 = math.sin((i / size.width * 3 * math.pi) - waveOffset * 1.5) * 6;
+      final wave2 = math.sin((i / size.width * 1.5 * math.pi) + waveOffset) * 4;
+      final y = 8 + wave1 + wave2;
+      path2.lineTo(i, y);
+    }
+
+    path2.lineTo(size.width, 10);
+    path2.lineTo(size.width, size.height);
+    path2.close();
+
+    final paint2 = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withOpacity(0.4), // Bright highlight at top
+          Colors.white.withOpacity(0.2),
+          color.withOpacity(0.3),
+          color.withOpacity(0.5),
+        ],
+        stops: const [0.0, 0.2, 0.6, 1.0],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(path2, paint2);
+
+    // Subtle shimmer effect on top
+    final shimmerPath = Path();
+    shimmerPath.moveTo(0, 0);
+    for (double i = 0; i <= size.width; i += 0.5) {
+      final wave = math.sin((i / size.width * 6 * math.pi) + waveOffset * 2) * 3;
+      shimmerPath.lineTo(i, wave);
+    }
+    shimmerPath.lineTo(size.width, 0);
+    shimmerPath.close();
+
+    final shimmerPaint = Paint()
+      ..color = Colors.white.withOpacity(0.25)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(shimmerPath, shimmerPaint);
+  }
+
+  // Helper function to lighten a color
+  Color _lightenColor(Color color, double amount) {
+    final hsl = HSLColor.fromColor(color);
+    final lightness = (hsl.lightness + amount).clamp(0.0, 1.0);
+    return hsl.withLightness(lightness).toColor();
+  }
+
+  // Helper function to darken a color
+  Color _darkenColor(Color color, double amount) {
+    final hsl = HSLColor.fromColor(color);
+    final lightness = (hsl.lightness - amount).clamp(0.0, 1.0);
+    return hsl.withLightness(lightness).toColor();
+  }
+
+  @override
+  bool shouldRepaint(WavePainter oldDelegate) {
+    return oldDelegate.waveOffset != waveOffset;
+  }
+}
+
+// Custom painter for organic background shapes
+class OrganicShapesPainter extends CustomPainter {
+  final colors;
+
+  OrganicShapesPainter({required this.colors});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint1 = Paint()
+      ..color = colors.primaryLight.withOpacity(0.08)
+      ..style = PaintingStyle.fill;
+
+    final paint2 = Paint()
+      ..color = colors.primary.withOpacity(0.05)
+      ..style = PaintingStyle.fill;
+
+    // Draw organic blob shapes
+    final path1 = Path();
+    path1.moveTo(size.width * 0.7, 0);
+    path1.quadraticBezierTo(
+      size.width * 0.9, size.height * 0.1,
+      size.width, size.height * 0.25,
+    );
+    path1.lineTo(size.width, 0);
+    path1.close();
+    canvas.drawPath(path1, paint1);
+
+    final path2 = Path();
+    path2.moveTo(0, size.height * 0.6);
+    path2.quadraticBezierTo(
+      size.width * 0.15, size.height * 0.7,
+      size.width * 0.3, size.height * 0.65,
+    );
+    path2.quadraticBezierTo(
+      size.width * 0.4, size.height * 0.6,
+      size.width * 0.2, size.height * 0.5,
+    );
+    path2.lineTo(0, size.height * 0.5);
+    path2.close();
+    canvas.drawPath(path2, paint2);
+
+    // Draw circles
+    canvas.drawCircle(
+      Offset(size.width * 0.85, size.height * 0.15),
+      30,
+      paint2,
+    );
+
+    canvas.drawCircle(
+      Offset(size.width * 0.1, size.height * 0.75),
+      40,
+      paint1,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
