@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import '../core/constants/app_colors.dart';
 import '../providers/app_provider.dart';
 import 'home/home_screen.dart';
-import 'goals/goals_screen.dart';
-import 'notes/notes_screen.dart';
+import 'tracker/tracker_screen.dart';
 import 'reminders/reminders_screen.dart';
+import 'goals/goals_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -23,8 +23,8 @@ class _MainNavigationState extends State<MainNavigation> {
         _currentIndex = index;
       });
     }),
+    const TrackerScreen(),
     const RemindersScreen(),
-    const NotesScreen(),
     const GoalsScreen(),
   ];
 
@@ -65,16 +65,16 @@ class _MainNavigationState extends State<MainNavigation> {
                 ),
                 Expanded(
                   child: _buildNavItem(
-                    icon: Icons.checklist_rounded,
-                    label: 'ToDos',
+                    icon: Icons.calendar_today_rounded,
+                    label: 'Tracker',
                     index: 1,
                     colors: colors,
                   ),
                 ),
                 Expanded(
                   child: _buildNavItem(
-                    icon: Icons.edit_note_rounded,
-                    label: 'Notes',
+                    icon: Icons.checklist_rounded,
+                    label: 'ToDo',
                     index: 2,
                     colors: colors,
                   ),

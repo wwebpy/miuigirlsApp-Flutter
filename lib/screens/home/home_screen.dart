@@ -74,24 +74,103 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _setMood(int moodLevel) async {
-    final mood = Mood(
-      id: _todaysMood?.id ?? const Uuid().v4(),
-      moodLevel: moodLevel,
-      date: DateTime.now(),
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final colors = appProvider.currentThemeColors;
+    final noteController = TextEditingController(text: _todaysMood?.note ?? '');
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Text(
+              Mood(
+                id: '',
+                moodLevel: moodLevel,
+                date: DateTime.now(),
+              ).emoji,
+              style: const TextStyle(fontSize: 32),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'How are you feeling?',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Tell us why you feel ${Mood(id: '', moodLevel: moodLevel, date: DateTime.now()).label.toLowerCase()} today',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: colors.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: noteController,
+              decoration: InputDecoration(
+                hintText: 'What\'s on your mind?',
+                hintStyle: TextStyle(color: colors.textSecondary.withOpacity(0.5)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colors.textSecondary.withOpacity(0.3)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: colors.primary, width: 2),
+                ),
+              ),
+              maxLines: 4,
+              autofocus: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: colors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, noteController.text),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
     );
 
-    await StorageService.saveMood(mood);
-    setState(() {
-      _todaysMood = mood;
-    });
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Mood saved!'),
-          duration: Duration(seconds: 1),
-        ),
+    if (result != null) {
+      final mood = Mood(
+        id: _todaysMood?.id ?? const Uuid().v4(),
+        moodLevel: moodLevel,
+        date: DateTime.now(),
+        note: result.isEmpty ? null : result,
       );
+
+      await StorageService.saveMood(mood);
+      setState(() {
+        _todaysMood = mood;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Mood saved!'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
     }
   }
 
