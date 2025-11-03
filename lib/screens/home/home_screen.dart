@@ -23,7 +23,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   List<Note> _recentNotes = [];
   late AnimationController _animationController;
   late AnimationController _pulseController;
+  late PageController _carouselController;
   int? _selectedMoodIndex;
+  int _currentCarouselIndex = 3; // Start in der Mitte (leerer Kreis)
 
   @override
   void initState() {
@@ -38,12 +40,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 3000),
     )..repeat();
+
+    _carouselController = PageController(
+      initialPage: 3, // Start beim leeren Kreis (Index 3)
+      viewportFraction: 0.35, // Zeigt mehrere Buttons gleichzeitig
+    );
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     _pulseController.dispose();
+    _carouselController.dispose();
     super.dispose();
   }
 
@@ -356,11 +364,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildMoodMap(colors) {
     final moodData = [
-      {'label': 'Terrible', 'emoji': '😢', 'color': const Color(0xFFFF6B6B), 'level': 0},
-      {'label': 'Not Great', 'emoji': '😕', 'color': const Color(0xFFFFB347), 'level': 1},
-      {'label': 'Okay', 'emoji': '😐', 'color': const Color(0xFFFFE66D), 'level': 2},
-      {'label': 'Good', 'emoji': '😊', 'color': const Color(0xFFB8E994), 'level': 3},
-      {'label': 'Amazing', 'emoji': '🤩', 'color': const Color(0xFFFFD700), 'level': 4},
+      {'label': 'Terrible', 'emoji': '😢', 'color': const Color(0xFFFF6B6B), 'level': 0, 'isEmpty': false},
+      {'label': 'Not Great', 'emoji': '😕', 'color': const Color(0xFFFFB347), 'level': 1, 'isEmpty': false},
+      {'label': 'Okay', 'emoji': '😐', 'color': const Color(0xFFFFE66D), 'level': 2, 'isEmpty': false},
+      {'label': 'No Selection', 'emoji': '', 'color': colors.textSecondary, 'level': -1, 'isEmpty': true}, // Leerer Kreis in der Mitte
+      {'label': 'Good', 'emoji': '😊', 'color': const Color(0xFFB8E994), 'level': 3, 'isEmpty': false},
+      {'label': 'Amazing', 'emoji': '🤩', 'color': const Color(0xFFFFD700), 'level': 4, 'isEmpty': false},
     ];
 
     return Padding(
@@ -410,17 +419,53 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          // Outer glow rings
+                          // Outer glow rings - MEGA VERSTÄRKT
                           if (_todaysMood != null) ...[
+                            // Äußerster Glow Ring (sehr groß)
                             Container(
-                              width: 280,
-                              height: 280,
+                              width: 500,
+                              height: 500,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 gradient: RadialGradient(
                                   colors: [
                                     _getMoodColor(_todaysMood!.moodLevel).withOpacity(0),
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.2),
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.12),
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.06),
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0),
+                                  ],
+                                  stops: const [0.2, 0.5, 0.7, 0.85, 1.0],
+                                ),
+                              ),
+                            ),
+                            // Mittlerer Glow Ring
+                            Container(
+                              width: 380,
+                              height: 380,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0),
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.3),
                                     _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.15),
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0),
+                                  ],
+                                  stops: const [0.3, 0.6, 0.8, 1.0],
+                                ),
+                              ),
+                            ),
+                            // Innerer Glow Ring
+                            Container(
+                              width: 300,
+                              height: 300,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0),
+                                    _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.35),
                                     _getMoodColor(_todaysMood!.moodLevel).withOpacity(0),
                                   ],
                                   stops: const [0.4, 0.7, 1.0],
@@ -453,12 +498,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   blurRadius: 30,
                                   offset: const Offset(0, 15),
                                 ),
-                                if (_todaysMood != null)
+                                // MEGA VERSTÄRKTER Glow Shadow
+                                if (_todaysMood != null) ...[
+                                  BoxShadow(
+                                    color: _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.6),
+                                    blurRadius: 100,
+                                    offset: const Offset(0, 0),
+                                    spreadRadius: 30,
+                                  ),
+                                  BoxShadow(
+                                    color: _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.4),
+                                    blurRadius: 70,
+                                    offset: const Offset(0, 5),
+                                    spreadRadius: 20,
+                                  ),
                                   BoxShadow(
                                     color: _getMoodColor(_todaysMood!.moodLevel).withOpacity(0.3),
-                                    blurRadius: 40,
+                                    blurRadius: 50,
                                     offset: const Offset(0, 10),
                                   ),
+                                ],
                               ],
                             ),
                             child: ClipOval(
@@ -600,70 +659,131 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: 50),
 
-          // Mood buttons row
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            alignment: WrapAlignment.center,
-            children: moodData.map((mood) {
-              final index = mood['level'] as int;
-              final isSelected = _todaysMood?.moodLevel == index;
-              final color = mood['color'] as Color;
-              final label = mood['label'] as String;
+          // Option A: Clean Carousel (neu gebaut)
+          SizedBox(
+            height: 100,
+            child: PageView.builder(
+              controller: _carouselController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentCarouselIndex = index;
+                });
+              },
+              itemCount: moodData.length,
+              itemBuilder: (context, index) {
+                final mood = moodData[index];
+                final moodLevel = mood['level'] as int;
+                final color = mood['color'] as Color;
+                final label = mood['label'] as String;
+                final emoji = mood['emoji'] as String;
+                final isEmpty = mood['isEmpty'] as bool;
+                final isCenter = index == _currentCarouselIndex;
 
-              return GestureDetector(
-                onTap: () {
-                  setState(() => _selectedMoodIndex = index);
-                  Future.delayed(const Duration(milliseconds: 100), () {
-                    _setMood(index);
-                  });
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    gradient: isSelected
-                        ? LinearGradient(
-                            colors: [color, color.withOpacity(0.7)],
-                          )
-                        : null,
-                    color: isSelected ? null : color.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected ? color : color.withOpacity(0.4),
-                      width: isSelected ? 2 : 1,
-                    ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: color.withOpacity(0.4),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: -0.5,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.3),
-                          offset: const Offset(0, 1),
-                          blurRadius: 2,
+                return GestureDetector(
+                  onTap: () {
+                    if (!isCenter) {
+                      _carouselController.animateToPage(
+                        index,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    } else if (!isEmpty) {
+                      setState(() => _selectedMoodIndex = moodLevel);
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        _setMood(moodLevel);
+                      });
+                    }
+                  },
+                  child: Center(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      width: isCenter ? 70 : 50,
+                      height: isCenter ? 70 : 50,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: isCenter && !isEmpty
+                            ? LinearGradient(
+                                colors: [
+                                  color,
+                                  color.withOpacity(0.8),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                            : null,
+                        color: isEmpty
+                            ? colors.surface.withOpacity(0.5)
+                            : (isCenter ? null : color.withOpacity(0.15)),
+                        boxShadow: isCenter
+                            ? [
+                                BoxShadow(
+                                  color: isEmpty
+                                      ? colors.shadow.withOpacity(0.1)
+                                      : color.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                            : [],
+                        border: Border.all(
+                          color: isEmpty
+                              ? colors.textSecondary.withOpacity(0.3)
+                              : (isCenter ? Colors.white.withOpacity(0.9) : color.withOpacity(0.3)),
+                          width: isCenter ? 2.5 : 1.5,
                         ),
-                      ],
+                      ),
+                      child: Center(
+                        child: isEmpty
+                            ? Icon(
+                                Icons.remove,
+                                color: colors.textSecondary.withOpacity(0.4),
+                                size: isCenter ? 24 : 18,
+                              )
+                            : Text(
+                                emoji,
+                                style: TextStyle(
+                                  fontSize: isCenter ? 32 : 24,
+                                ),
+                              ),
+                      ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              },
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Label unter dem Carousel
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: Text(
+              moodData[_currentCarouselIndex]['label'] as String,
+              key: ValueKey(_currentCarouselIndex),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: colors.textPrimary,
+                letterSpacing: -0.2,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
+          // Instruction Text
+          Text(
+            'Swipe to select',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: colors.textSecondary.withOpacity(0.5),
+              letterSpacing: 0.5,
+            ),
           ),
 
           if (_todaysMood != null) ...[
