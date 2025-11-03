@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     _carouselController = PageController(
       initialPage: 3, // Start beim leeren Kreis (Index 3)
-      viewportFraction: 0.35, // Zeigt mehrere Buttons gleichzeitig
+      viewportFraction: 0.25, // Zeigt mehr Buttons gleichzeitig
     );
   }
 
@@ -663,7 +663,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
           // Option A: Clean Carousel (neu gebaut)
           SizedBox(
-            height: 100,
+            height: 120,
             child: PageView.builder(
               controller: _carouselController,
               onPageChanged: (index) {
@@ -700,8 +700,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut,
-                      width: isCenter ? 70 : 50,
-                      height: isCenter ? 70 : 50,
+                      width: isCenter ? 90 : 65,
+                      height: isCenter ? 90 : 65,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: isCenter && !isEmpty
@@ -740,12 +740,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ? Icon(
                                 Icons.remove,
                                 color: colors.textSecondary.withOpacity(0.4),
-                                size: isCenter ? 24 : 18,
+                                size: isCenter ? 28 : 20,
                               )
                             : Text(
                                 emoji,
                                 style: TextStyle(
-                                  fontSize: isCenter ? 32 : 24,
+                                  fontSize: isCenter ? 40 : 28,
                                 ),
                               ),
                       ),
@@ -756,7 +756,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
 
           // Label unter dem Carousel
           AnimatedSwitcher(
@@ -765,7 +765,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               moodData[_currentCarouselIndex]['label'] as String,
               key: ValueKey(_currentCarouselIndex),
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 15,
                 fontWeight: FontWeight.w700,
                 color: colors.textPrimary,
                 letterSpacing: -0.2,
