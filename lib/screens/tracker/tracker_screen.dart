@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../providers/app_provider.dart';
 import '../../services/storage_service.dart';
 import '../../models/mood.dart';
@@ -95,6 +96,337 @@ class _TrackerScreenState extends State<TrackerScreen> {
       default:
         return 'Unknown';
     }
+  }
+
+  Future<void> _showMoodDetails(Mood mood) async {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final colors = appProvider.currentThemeColors;
+    final moodColor = _getMoodColor(mood.moodLevel);
+    final moodEmoji = _getMoodEmoji(mood.moodLevel);
+    final moodLabel = _getMoodLabel(mood.moodLevel);
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.92,
+        decoration: BoxDecoration(
+          color: colors.background,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
+        child: Column(
+          children: [
+            // Drag handle
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colors.textSecondary.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.only(top: 44),
+                child: Column(
+                  children: [
+                    // Large Liquid Fill Circle with Glow
+                    SizedBox(
+                      height: 260,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        clipBehavior: Clip.none,
+                        children: [
+                          // Background Glow Effect
+                          OverflowBox(
+                            maxWidth: 400,
+                            maxHeight: 400,
+                            child: Container(
+                              width: 400,
+                              height: 400,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    moodColor.withOpacity(0.3),
+                                    moodColor.withOpacity(0.15),
+                                    moodColor.withOpacity(0.05),
+                                    moodColor.withOpacity(0),
+                                  ],
+                                  stops: const [0.0, 0.4, 0.7, 1.0],
+                                ),
+                              ),
+                            ),
+                          ),
+                          // The actual circle
+                          Container(
+                            width: 260,
+                            height: 260,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colors.surface,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colors.shadow.withOpacity(0.15),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                                BoxShadow(
+                                  color: moodColor.withOpacity(0.6),
+                                  blurRadius: 50,
+                                  offset: const Offset(0, 0),
+                                  spreadRadius: 10,
+                                ),
+                              ],
+                            ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Gradient fill
+                                Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        moodColor.withOpacity(0.3),
+                                        moodColor,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                // Emoji
+                                Text(
+                                  moodEmoji,
+                                  style: const TextStyle(fontSize: 100),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // "I'm feeling..." text
+                    Column(
+                      children: [
+                        Text(
+                          'I\'m feeling',
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w500,
+                            color: colors.textPrimary,
+                            letterSpacing: 0,
+                            height: 1.0,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          moodLabel,
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w600,
+                            fontStyle: FontStyle.italic,
+                            color: moodColor,
+                            letterSpacing: 0,
+                            height: 1.0,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Date & Time Pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: colors.textSecondary.withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        '${mood.date.day}.${mood.date.month}.${mood.date.year} • ${mood.date.hour}:${mood.date.minute.toString().padLeft(2, '0')}',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // Journal Entry (if exists)
+                    if (mood.note != null && mood.note!.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                          decoration: BoxDecoration(
+                            color: colors.surface,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: colors.textSecondary.withOpacity(0.15),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  mood.note!,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
+
+                    // Activities (if exists)
+                    if (mood.activities != null && mood.activities!.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'What you were doing',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: mood.activities!.map((activity) =>
+                            _buildActivityPill(colors, moodColor, activity)
+                          ).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                    ],
+
+                    // People (if exists)
+                    if (mood.people != null && mood.people!.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Who you were with',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: mood.people!.map((person) =>
+                            _buildActivityPill(colors, moodColor, person)
+                          ).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                    ],
+
+                    // Places (if exists)
+                    if (mood.places != null && mood.places!.isNotEmpty) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Where you were',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: mood.places!.map((place) =>
+                            _buildActivityPill(colors, moodColor, place)
+                          ).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                    ],
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActivityPill(dynamic colors, Color moodColor, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      decoration: BoxDecoration(
+        color: moodColor.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: moodColor,
+          width: 1.5,
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: colors.textPrimary,
+        ),
+      ),
+    );
   }
 
   @override
@@ -496,79 +828,82 @@ class _TrackerScreenState extends State<TrackerScreen> {
                     itemCount: selectedDayEntries.length,
                     itemBuilder: (context, index) {
                       final entry = selectedDayEntries[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: colors.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: colors.shadow,
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Mood indicator
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: _getMoodColor(entry.moodLevel).withOpacity(0.2),
-                                shape: BoxShape.circle,
+                      return GestureDetector(
+                        onTap: () => _showMoodDetails(entry),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: colors.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: colors.shadow,
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
                               ),
-                              child: Center(
-                                child: Text(
-                                  _getMoodEmoji(entry.moodLevel),
-                                  style: const TextStyle(fontSize: 24),
+                            ],
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Mood indicator
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: _getMoodColor(entry.moodLevel).withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    _getMoodEmoji(entry.moodLevel),
+                                    style: const TextStyle(fontSize: 24),
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            // Content
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        _getMoodLabel(entry.moodLevel),
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: colors.textPrimary,
+                              const SizedBox(width: 16),
+                              // Content
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          _getMoodLabel(entry.moodLevel),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: colors.textPrimary,
+                                          ),
                                         ),
-                                      ),
+                                        Text(
+                                          '${entry.date.hour.toString().padLeft(2, '0')}:${entry.date.minute.toString().padLeft(2, '0')}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: colors.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    if (entry.note != null && entry.note!.isNotEmpty) ...[
+                                      const SizedBox(height: 8),
                                       Text(
-                                        '${entry.date.hour.toString().padLeft(2, '0')}:${entry.date.minute.toString().padLeft(2, '0')}',
+                                        entry.note!,
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 14,
                                           color: colors.textSecondary,
+                                          height: 1.4,
                                         ),
                                       ),
                                     ],
-                                  ),
-                                  if (entry.note != null && entry.note!.isNotEmpty) ...[
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      entry.note!,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: colors.textSecondary,
-                                        height: 1.4,
-                                      ),
-                                    ),
                                   ],
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },

@@ -27,12 +27,24 @@ class Mood extends HiveObject {
   @HiveField(4)
   List<String>? tags; // e.g., "productive", "tired", "energetic"
 
+  @HiveField(5)
+  List<String>? activities; // What are you doing?
+
+  @HiveField(6)
+  List<String>? people; // Who are you with?
+
+  @HiveField(7)
+  List<String>? places; // Where are you?
+
   Mood({
     required this.id,
     required this.moodLevel,
     required this.date,
     this.note,
     this.tags,
+    this.activities,
+    this.people,
+    this.places,
   });
 
   MoodLevel get level {
@@ -93,6 +105,9 @@ class Mood extends HiveObject {
       'date': date.toIso8601String(),
       'note': note,
       'tags': tags,
+      'activities': activities,
+      'people': people,
+      'places': places,
     };
   }
 
@@ -103,6 +118,9 @@ class Mood extends HiveObject {
       date: DateTime.parse(json['date']),
       note: json['note'],
       tags: json['tags'] != null ? List<String>.from(json['tags']) : null,
+      activities: json['activities'] != null ? List<String>.from(json['activities']) : null,
+      people: json['people'] != null ? List<String>.from(json['people']) : null,
+      places: json['places'] != null ? List<String>.from(json['places']) : null,
     );
   }
 }
