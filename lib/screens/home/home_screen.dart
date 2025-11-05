@@ -227,16 +227,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final colors = appProvider.currentThemeColors;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background with organic shapes
-          CustomPaint(
-            painter: OrganicShapesPainter(colors: colors),
-            child: Container(),
-          ),
-
-          // Main content
-          SafeArea(
+      body: SafeArea(
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(),
               slivers: [
@@ -323,8 +314,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ],
             ),
           ),
-        ],
-      ),
     );
   }
 
@@ -1124,63 +1113,4 @@ class WavePainter extends CustomPainter {
   bool shouldRepaint(WavePainter oldDelegate) {
     return oldDelegate.waveOffset != waveOffset;
   }
-}
-
-// Custom painter for organic background shapes
-class OrganicShapesPainter extends CustomPainter {
-  final colors;
-
-  OrganicShapesPainter({required this.colors});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint1 = Paint()
-      ..color = colors.primaryLight.withOpacity(0.08)
-      ..style = PaintingStyle.fill;
-
-    final paint2 = Paint()
-      ..color = colors.primary.withOpacity(0.05)
-      ..style = PaintingStyle.fill;
-
-    // Draw organic blob shapes
-    final path1 = Path();
-    path1.moveTo(size.width * 0.7, 0);
-    path1.quadraticBezierTo(
-      size.width * 0.9, size.height * 0.1,
-      size.width, size.height * 0.25,
-    );
-    path1.lineTo(size.width, 0);
-    path1.close();
-    canvas.drawPath(path1, paint1);
-
-    final path2 = Path();
-    path2.moveTo(0, size.height * 0.6);
-    path2.quadraticBezierTo(
-      size.width * 0.15, size.height * 0.7,
-      size.width * 0.3, size.height * 0.65,
-    );
-    path2.quadraticBezierTo(
-      size.width * 0.4, size.height * 0.6,
-      size.width * 0.2, size.height * 0.5,
-    );
-    path2.lineTo(0, size.height * 0.5);
-    path2.close();
-    canvas.drawPath(path2, paint2);
-
-    // Draw circles
-    canvas.drawCircle(
-      Offset(size.width * 0.85, size.height * 0.15),
-      30,
-      paint2,
-    );
-
-    canvas.drawCircle(
-      Offset(size.width * 0.1, size.height * 0.75),
-      40,
-      paint1,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

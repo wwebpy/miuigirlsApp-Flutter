@@ -265,7 +265,17 @@ class _RemindersScreenState extends State<RemindersScreen> {
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: const Text('Reminders'),
+        backgroundColor: colors.surface,
+        elevation: 0,
+        title: Text(
+          'ToDo',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            color: colors.textPrimary,
+            letterSpacing: -0.5,
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_rounded),

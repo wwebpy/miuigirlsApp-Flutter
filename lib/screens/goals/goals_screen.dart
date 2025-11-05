@@ -159,7 +159,17 @@ class _GoalsScreenState extends State<GoalsScreen> {
     return Scaffold(
       backgroundColor: colors.background,
       appBar: AppBar(
-        title: const Text('Goals & Vision'),
+        backgroundColor: colors.surface,
+        elevation: 0,
+        title: Text(
+          'Goals & Vision',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            color: colors.textPrimary,
+            letterSpacing: -0.5,
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.add_rounded),
