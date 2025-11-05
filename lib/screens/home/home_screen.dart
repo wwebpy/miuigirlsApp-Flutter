@@ -655,6 +655,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             height: 120,
             child: PageView.builder(
               controller: _carouselController,
+              clipBehavior: Clip.none,
               onPageChanged: (index) {
                 setState(() {
                   _currentCarouselIndex = index;
