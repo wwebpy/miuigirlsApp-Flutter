@@ -34,6 +34,15 @@ class Reminder extends HiveObject {
   @HiveField(9)
   int? notificationId; // For flutter_local_notifications
 
+  @HiveField(10)
+  String? category; // Work, Home, Health, Personal, etc.
+
+  @HiveField(11)
+  bool isCompleted;
+
+  @HiveField(12)
+  DateTime? dueDate; // Optional due date
+
   Reminder({
     required this.id,
     required this.title,
@@ -45,6 +54,9 @@ class Reminder extends HiveObject {
     this.icon,
     this.color,
     this.notificationId,
+    this.category,
+    this.isCompleted = false,
+    this.dueDate,
   });
 
   bool get isRepeating => repeatDays.isNotEmpty;
@@ -69,6 +81,9 @@ class Reminder extends HiveObject {
       'icon': icon,
       'color': color,
       'notificationId': notificationId,
+      'category': category,
+      'isCompleted': isCompleted,
+      'dueDate': dueDate?.toIso8601String(),
     };
   }
 
@@ -84,6 +99,9 @@ class Reminder extends HiveObject {
       icon: json['icon'],
       color: json['color'],
       notificationId: json['notificationId'],
+      category: json['category'],
+      isCompleted: json['isCompleted'] ?? false,
+      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
     );
   }
 }

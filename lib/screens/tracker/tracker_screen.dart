@@ -452,356 +452,238 @@ class _TrackerScreenState extends State<TrackerScreen> {
       ),
       body: Column(
         children: [
-          // Calendar
-          Container(
-            margin: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  colors.surface,
-                  colors.background.withOpacity(0.95),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          // Calendar - Full width
+          Expanded(
+            flex: 2,
+            child: Container(
+              margin: const EdgeInsets.all(0),
+              decoration: BoxDecoration(
+                color: colors.surface,
               ),
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(
-                color: colors.primary.withOpacity(0.15),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.shadow.withOpacity(0.15),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
-                  spreadRadius: 4,
-                ),
-                BoxShadow(
-                  color: colors.primary.withOpacity(0.05),
-                  blurRadius: 40,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: TableCalendar(
-              firstDay: DateTime.utc(2020, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              eventLoader: _getEventsForDay,
-              calendarFormat: CalendarFormat.month,
-              startingDayOfWeek: StartingDayOfWeek.monday,
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-              },
-              onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
-              },
-              calendarStyle: CalendarStyle(
-                // Today - nur Border, keine Füllung
-                todayDecoration: BoxDecoration(
-                  border: Border.all(
-                    color: colors.primary,
-                    width: 2,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                child: TableCalendar(
+                  firstDay: DateTime.utc(2020, 1, 1),
+                  lastDay: DateTime.utc(2030, 12, 31),
+                  focusedDay: _focusedDay,
+                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                  eventLoader: _getEventsForDay,
+                  calendarFormat: CalendarFormat.month,
+                  startingDayOfWeek: StartingDayOfWeek.monday,
+                  onDaySelected: (selectedDay, focusedDay) {
+                    setState(() {
+                      _selectedDay = selectedDay;
+                      _focusedDay = focusedDay;
+                    });
+                  },
+                  onPageChanged: (focusedDay) {
+                    _focusedDay = focusedDay;
+                  },
+                  calendarStyle: CalendarStyle(
+                    // Today - nur Border, keine Füllung
+                    todayDecoration: BoxDecoration(
+                      border: Border.all(
+                        color: colors.primary,
+                        width: 2,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    // Selected day
+                    selectedDecoration: BoxDecoration(
+                      color: colors.primary.withOpacity(0.2),
+                      border: Border.all(
+                        color: colors.primary,
+                        width: 2,
+                      ),
+                      shape: BoxShape.circle,
+                    ),
+                    // Marker ausblenden (wir nutzen calendarBuilders)
+                    markerDecoration: const BoxDecoration(
+                      color: Colors.transparent,
+                    ),
+                    outsideDaysVisible: false,
                   ),
-                  shape: BoxShape.circle,
-                ),
-                // Selected day
-                selectedDecoration: BoxDecoration(
-                  color: colors.primary.withOpacity(0.2),
-                  border: Border.all(
-                    color: colors.primary,
-                    width: 2,
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                // Marker ausblenden (wir nutzen calendarBuilders)
-                markerDecoration: const BoxDecoration(
-                  color: Colors.transparent,
-                ),
-                outsideDaysVisible: false,
-              ),
-              calendarBuilders: CalendarBuilders(
-                // Custom day builder für volle Farbe oder Gradient
-                defaultBuilder: (context, day, focusedDay) {
-                  final events = _getEventsForDay(day);
-                  final hasMood = events.isNotEmpty;
-                  final isToday = isSameDay(day, DateTime.now());
-                  final isSelected = isSameDay(day, _selectedDay);
+                  calendarBuilders: CalendarBuilders(
+                    // Custom day builder mit Mini-Emoji-Kreisen
+                    defaultBuilder: (context, day, focusedDay) {
+                      final events = _getEventsForDay(day);
+                      final hasMood = events.isNotEmpty;
+                      final isToday = isSameDay(day, DateTime.now());
+                      final isSelected = isSameDay(day, _selectedDay);
 
-                  if (hasMood) {
-                    // Ein Mood = volle Farbe
-                    if (events.length == 1) {
-                      final moodColor = _getMoodColor(events.first.moodLevel);
-
-                      return Container(
-                        margin: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: moodColor,
-                          border: isToday
-                              ? Border.all(
-                                  color: colors.primary,
-                                  width: 2.5,
-                                )
-                              : isSelected
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Tag-Nummer
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isSelected
+                                  ? colors.primary.withOpacity(0.2)
+                                  : Colors.transparent,
+                              border: isToday
                                   ? Border.all(
                                       color: colors.primary,
                                       width: 2,
                                     )
-                                  : null,
-                          boxShadow: [
-                            BoxShadow(
-                              color: moodColor.withOpacity(0.4),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                                  : isSelected
+                                      ? Border.all(
+                                          color: colors.primary,
+                                          width: 1.5,
+                                        )
+                                      : null,
                             ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${day.day}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                            child: Center(
+                              child: Text(
+                                '${day.day}',
+                                style: TextStyle(
+                                  color: colors.textPrimary,
+                                  fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
+                                  fontSize: 15,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 2),
+                          // Mini-Farb-Kreise
+                          if (hasMood)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: events.take(3).map((event) {
+                                final moodColor = _getMoodColor(event.moodLevel);
+                                return Container(
+                                  width: 12,
+                                  height: 12,
+                                  margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: moodColor,
+                                    border: Border.all(
+                                      color: colors.background,
+                                      width: 1,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                        ],
                       );
-                    }
+                    },
+                    // Today builder - gleich wie defaultBuilder, nur isToday ist immer true
+                    todayBuilder: (context, day, focusedDay) {
+                      final events = _getEventsForDay(day);
+                      final hasMood = events.isNotEmpty;
+                      final isSelected = isSameDay(day, _selectedDay);
 
-                    // Mehrere Moods = Gradient
-                    final moodColors = events.map((e) => _getMoodColor(e.moodLevel)).toList();
-
-                    return Container(
-                      margin: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: moodColors,
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        border: isToday
-                            ? Border.all(
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Tag-Nummer
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isSelected
+                                  ? colors.primary.withOpacity(0.2)
+                                  : Colors.transparent,
+                              border: Border.all(
                                 color: colors.primary,
-                                width: 2.5,
-                              )
-                            : isSelected
-                                ? Border.all(
-                                    color: colors.primary,
-                                    width: 2,
-                                  )
-                                : null,
-                        boxShadow: [
-                          BoxShadow(
-                            color: moodColors.first.withOpacity(0.4),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                                width: 2,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${day.day}',
+                                style: TextStyle(
+                                  color: colors.textPrimary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
                           ),
+                          const SizedBox(height: 2),
+                          // Mini-Farb-Kreise
+                          if (hasMood)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: events.take(3).map((event) {
+                                final moodColor = _getMoodColor(event.moodLevel);
+                                return Container(
+                                  width: 12,
+                                  height: 12,
+                                  margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: moodColor,
+                                    border: Border.all(
+                                      color: colors.background,
+                                      width: 1,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
                         ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${day.day}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  // Tage OHNE Mood - normale Darstellung
-                  return Container(
-                    margin: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colors.surface,
-                      border: isToday
-                          ? Border.all(
-                              color: colors.primary,
-                              width: 2.5,
-                            )
-                          : isSelected
-                              ? Border.all(
-                                  color: colors.primary.withOpacity(0.4),
-                                  width: 2,
-                                )
-                              : null,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${day.day}',
-                        style: TextStyle(
-                          color: colors.textPrimary,
-                          fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-                // Today builder
-                todayBuilder: (context, day, focusedDay) {
-                  final events = _getEventsForDay(day);
-                  final hasMood = events.isNotEmpty;
-
-                  if (hasMood) {
-                    // Ein Mood = volle Farbe
-                    if (events.length == 1) {
-                      final moodColor = _getMoodColor(events.first.moodLevel);
-
-                      return Container(
-                        margin: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: moodColor,
-                          border: Border.all(
-                            color: colors.primary,
-                            width: 2.5,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: moodColor.withOpacity(0.5),
-                              blurRadius: 12,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${day.day}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
                       );
-                    }
-
-                    // Mehrere Moods = Gradient
-                    final moodColors = events.map((e) => _getMoodColor(e.moodLevel)).toList();
-
-                    return Container(
-                      margin: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: moodColors,
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        border: Border.all(
-                          color: colors.primary,
-                          width: 2.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: moodColors.first.withOpacity(0.5),
-                            blurRadius: 12,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Text(
-                          '${day.day}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  // Today ohne Mood
-                  return Container(
-                    margin: const EdgeInsets.all(4),
+                    },
+                  ),
+                  headerStyle: HeaderStyle(
+                    formatButtonVisible: false,
+                    titleCentered: true,
+                    titleTextStyle: TextStyle(
+                      color: colors.textPrimary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.5,
+                    ),
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colors.surface,
-                      border: Border.all(
-                        color: colors.primary,
-                        width: 2.5,
-                      ),
+                      color: colors.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Center(
-                      child: Text(
-                        '${day.day}',
-                        style: TextStyle(
-                          color: colors.textPrimary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
+                    headerPadding: const EdgeInsets.symmetric(vertical: 12),
+                    leftChevronIcon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withOpacity(0.15),
+                        shape: BoxShape.circle,
                       ),
+                      child: Icon(Icons.chevron_left, color: colors.primary, size: 20),
                     ),
-                  );
-                },
-              ),
-              headerStyle: HeaderStyle(
-                formatButtonVisible: false,
-                titleCentered: true,
-                titleTextStyle: TextStyle(
-                  color: colors.textPrimary,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
-                ),
-                decoration: BoxDecoration(
-                  color: colors.primary.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                headerPadding: const EdgeInsets.symmetric(vertical: 12),
-                leftChevronIcon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: colors.primary.withOpacity(0.15),
-                    shape: BoxShape.circle,
+                    rightChevronIcon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: colors.primary.withOpacity(0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.chevron_right, color: colors.primary, size: 20),
+                    ),
                   ),
-                  child: Icon(Icons.chevron_left, color: colors.primary, size: 20),
-                ),
-                rightChevronIcon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: colors.primary.withOpacity(0.15),
-                    shape: BoxShape.circle,
+                  daysOfWeekStyle: DaysOfWeekStyle(
+                    weekdayStyle: TextStyle(
+                      color: colors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      letterSpacing: 0.5,
+                    ),
+                    weekendStyle: TextStyle(
+                      color: colors.accent,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                      letterSpacing: 0.5,
+                    ),
                   ),
-                  child: Icon(Icons.chevron_right, color: colors.primary, size: 20),
                 ),
-              ),
-              daysOfWeekStyle: DaysOfWeekStyle(
-                weekdayStyle: TextStyle(
-                  color: colors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                  letterSpacing: 0.5,
-                ),
-                weekendStyle: TextStyle(
-                  color: colors.accent,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                  letterSpacing: 0.5,
-                ),
-              ),
               ),
             ),
           ),
 
           // Selected day entries
           Expanded(
+            flex: 1,
             child: selectedDayEntries.isEmpty
                 ? Center(
                     child: Column(
@@ -823,10 +705,29 @@ class _TrackerScreenState extends State<TrackerScreen> {
                       ],
                     ),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: selectedDayEntries.length,
-                    itemBuilder: (context, index) {
+                : Column(
+                    children: [
+                      // Header Text
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'On that day you felt...',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: selectedDayEntries.length,
+                          itemBuilder: (context, index) {
                       final entry = selectedDayEntries[index];
                       return GestureDetector(
                         onTap: () => _showMoodDetails(entry),
@@ -906,7 +807,10 @@ class _TrackerScreenState extends State<TrackerScreen> {
                           ),
                         ),
                       );
-                    },
+                          },
+                        ),
+                      ),
+                    ],
                   ),
           ),
         ],
