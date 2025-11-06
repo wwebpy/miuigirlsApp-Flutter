@@ -713,7 +713,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'On that day you felt...',
+                            'On that day..',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w700,
@@ -746,7 +746,6 @@ class _TrackerScreenState extends State<TrackerScreen> {
                             ],
                           ),
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Mood indicator
                               Container(
@@ -769,39 +768,31 @@ class _TrackerScreenState extends State<TrackerScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          _getMoodLabel(entry.moodLevel),
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: colors.textPrimary,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${entry.date.hour.toString().padLeft(2, '0')}:${entry.date.minute.toString().padLeft(2, '0')}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: colors.textSecondary,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    if (entry.note != null && entry.note!.isNotEmpty) ...[
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        entry.note!,
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: colors.textSecondary,
-                                          height: 1.4,
-                                        ),
+                                    Text(
+                                      'You felt ${_getMoodLabel(entry.moodLevel).toLowerCase()}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: colors.textPrimary,
+                                        height: 1.3,
                                       ),
-                                    ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Tap to view details',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: _getMoodColor(entry.moodLevel),
+                                      ),
+                                    ),
                                   ],
                                 ),
+                              ),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                color: colors.textSecondary,
+                                size: 28,
                               ),
                             ],
                           ),
